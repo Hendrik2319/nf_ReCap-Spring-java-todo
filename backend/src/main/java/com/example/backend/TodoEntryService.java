@@ -29,8 +29,8 @@ public class TodoEntryService {
 
         if (savedEntryOpt.isPresent()) {
             TodoEntry savedEntry = savedEntryOpt.get();
-            if (todoEntry.description()!=null) savedEntry =savedEntry.withDescription(todoEntry.description());
-            if (todoEntry.status()     !=null) savedEntry =savedEntry.withStatus     (todoEntry.status     ());
+            if (todoEntry.description()!=null) savedEntry = savedEntry.withDescription(todoEntry.description());
+            if (todoEntry.status()     !=null) savedEntry = savedEntry.withStatus     (todoEntry.status     ());
             savedEntryOpt = Optional.of(todoEntryRepository.save(savedEntry));
         }
 

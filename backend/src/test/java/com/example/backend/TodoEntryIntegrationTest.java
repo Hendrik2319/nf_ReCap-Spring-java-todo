@@ -219,7 +219,7 @@ class TodoEntryIntegrationTest {
 
     @Test
     @DirtiesContext
-    void whenUpdateEntry_getsValidIdAndDescription_returnsChangedProduct() throws Exception {
+    void whenUpdateEntry_getsValidIdWithoutOtherValues_returnsChangedTodoEntry() throws Exception {
         // Given
         String id = addTestTodoEntry("Entry 1", "OPEN" );
 
@@ -229,8 +229,31 @@ class TodoEntryIntegrationTest {
                         .put("/api/todo/%s".formatted(id))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                { "description":"Entry A" }
-                                """)
+                                { "id":"%s" }
+                                """.formatted(id))
+                )
+
+                // Then
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                        { "id":"%s", "description":"%s", "status":"%s" }
+                """.formatted(id, "Entry 1", "OPEN")));
+    }
+
+    @Test
+    @DirtiesContext
+    void whenUpdateEntry_getsValidIdAndDescription_returnsChangedTodoEntry() throws Exception {
+        // Given
+        String id = addTestTodoEntry("Entry 1", "OPEN" );
+
+        // When
+        mockMvc
+                .perform(MockMvcRequestBuilders
+                        .put("/api/todo/%s".formatted(id))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "id":"%s", "description":"Entry A" }
+                                """.formatted(id))
                 )
 
                 // Then
@@ -242,7 +265,7 @@ class TodoEntryIntegrationTest {
 
     @Test
     @DirtiesContext
-    void whenUpdateEntry_getsValidIdAndStatus_returnsChangedProduct() throws Exception {
+    void whenUpdateEntry_getsValidIdAndStatus_returnsChangedTodoEntry() throws Exception {
         // Given
         String id = addTestTodoEntry("Entry 1", "OPEN" );
 
@@ -252,8 +275,8 @@ class TodoEntryIntegrationTest {
                         .put("/api/todo/%s".formatted(id))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                { "status":"DONE" }
-                                """)
+                                { "id":"%s", "status":"DONE" }
+                                """.formatted(id))
                 )
 
                 // Then
@@ -265,7 +288,7 @@ class TodoEntryIntegrationTest {
 
     @Test
     @DirtiesContext
-    void whenUpdateEntry_getsValidIdAndDescriptionAndStatus_returnsChangedProduct() throws Exception {
+    void whenUpdateEntry_getsValidIdAndDescriptionAndStatus_returnsUpdatedTodoEntry() throws Exception {
         // Given
         String id = addTestTodoEntry("Entry 1", "OPEN" );
 
@@ -275,8 +298,8 @@ class TodoEntryIntegrationTest {
                         .put("/api/todo/%s".formatted(id))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                { "description":"Entry A", "status":"DONE" }
-                                """)
+                                { "id":"%s", "description":"Entry A", "status":"DONE" }
+                                """.formatted(id))
                 )
 
                 // Then
