@@ -30,7 +30,7 @@ public class TodoEntryController {
 
     @PutMapping("/{id}")
     ResponseEntity<TodoEntry> updateEntry(@PathVariable String id, @RequestBody TodoEntry todoEntry) {
-        if (!id.equals(todoEntry.id()))
+        if (todoEntry.id()!=null && !id.equals(todoEntry.id()))
             return ResponseEntity.badRequest().build();
 
         return ResponseEntity.of(todoEntryRepository.updateEntry(id,todoEntry));

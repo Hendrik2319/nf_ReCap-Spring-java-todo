@@ -26,10 +26,11 @@ public class TodoEntryService {
 
     public Optional<TodoEntry> updateEntry(String id, TodoEntry todoEntry) {
         Optional<TodoEntry> savedEntryOpt = todoEntryRepository.findById(id);
+
         if (savedEntryOpt.isPresent()) {
-            TodoEntry savedEntry = savedEntryOpt.get()
-                    .withDescription(todoEntry.description())
-                    .withStatus(todoEntry.status());
+            TodoEntry savedEntry = savedEntryOpt.get();
+            if (todoEntry.description()!=null) savedEntry =savedEntry.withDescription(todoEntry.description());
+            if (todoEntry.status()     !=null) savedEntry =savedEntry.withStatus     (todoEntry.status     ());
             savedEntryOpt = Optional.of(todoEntryRepository.save(savedEntry));
         }
 
