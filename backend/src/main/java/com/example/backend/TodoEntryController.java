@@ -5,28 +5,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/todo")
 @RequiredArgsConstructor
 public class TodoEntryController {
 
-    private final TodoEntryRepository todoEntryRepository;
+    private final TodoEntryService todoEntryRepository;
 
     @GetMapping
     List<TodoEntry> getAllEntries() {
-        return todoEntryRepository.findAll();
+        return todoEntryRepository.getAllEntries();
     }
 
     @PostMapping
     TodoEntry createEntry(@RequestBody NewTodoEntry newTodoEntry) {
-        return todoEntryRepository.save(new TodoEntry(newTodoEntry));
+        return todoEntryRepository.createEntry(newTodoEntry);
     }
 
     @GetMapping("/{id}")
     ResponseEntity<TodoEntry> getEntry(@PathVariable String id) {
-        return ResponseEntity.of(todoEntryRepository.findById(id));
+        return ResponseEntity.of(todoEntryRepository.getEntry(id));
     }
 
     @PutMapping("/{id}")
@@ -34,20 +33,12 @@ public class TodoEntryController {
         if (!id.equals(todoEntry.id()))
             return ResponseEntity.badRequest().build();
 
-        Optional<TodoEntry> savedEntryOpt = todoEntryRepository.findById(id);
-        if (savedEntryOpt.isPresent()) {
-            TodoEntry savedEntry = savedEntryOpt.get()
-                    .withDescription(todoEntry.description())
-                    .withStatus(todoEntry.status());
-            savedEntryOpt = Optional.of(todoEntryRepository.save(savedEntry));
-        }
-
-        return ResponseEntity.of(savedEntryOpt);
+        return ResponseEntity.of(todoEntryRepository.updateEntry(id,todoEntry));
     }
 
     @DeleteMapping("/{id}")
     void deleteEntry(@PathVariable String id) {
-        todoEntryRepository.deleteById(id);
+        todoEntryRepository.deleteEntry(id);
     }
 
 }
