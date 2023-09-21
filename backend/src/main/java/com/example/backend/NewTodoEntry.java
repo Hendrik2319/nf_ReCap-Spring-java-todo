@@ -1,4 +1,4 @@
 package com.example.backend;
 
-public record NewTodoEntry(String description, String status) {
+public record NewTodoEntry(String description, TodoEntryStatus status) {
 }

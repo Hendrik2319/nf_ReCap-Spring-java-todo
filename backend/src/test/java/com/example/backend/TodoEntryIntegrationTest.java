@@ -24,7 +24,7 @@ class TodoEntryIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private String addTestTodoEntry(String description, String status) {
+    private String addTestTodoEntry(String description, TodoEntryStatus status) {
         try {
 
             ResultActions resultActions = mockMvc
@@ -45,7 +45,7 @@ class TodoEntryIntegrationTest {
         }
     }
 
-    private String getIdFromResultTodoEntry(String description, String status, ResultActions resultActions) {
+    private String getIdFromResultTodoEntry(String description, TodoEntryStatus status, ResultActions resultActions) {
         try {
             String body = resultActions
                     .andReturn()
@@ -99,9 +99,9 @@ class TodoEntryIntegrationTest {
     @DirtiesContext
     void whenGetAllEntries_calledOnFilledDataBase_returnsFilledList() throws Exception {
         // Given
-        String id1 = addTestTodoEntry("Entry 1", "OPEN"      );
-        String id2 = addTestTodoEntry("Entry 2", "DONE"      );
-        String id3 = addTestTodoEntry("Entry 3", "IN_PROGESS");
+        String id1 = addTestTodoEntry("Entry 1", TodoEntryStatus.OPEN       );
+        String id2 = addTestTodoEntry("Entry 2", TodoEntryStatus.DONE       );
+        String id3 = addTestTodoEntry("Entry 3", TodoEntryStatus.IN_PROGRESS);
 
         // When
         mockMvc
@@ -113,9 +113,9 @@ class TodoEntryIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                     [
-                        { "id":"%s", "description":"Entry 1", "status":"OPEN"       },
-                        { "id":"%s", "description":"Entry 2", "status":"DONE"       },
-                        { "id":"%s", "description":"Entry 3", "status":"IN_PROGESS" }
+                        { "id":"%s", "description":"Entry 1", "status":"OPEN"        },
+                        { "id":"%s", "description":"Entry 2", "status":"DONE"        },
+                        { "id":"%s", "description":"Entry 3", "status":"IN_PROGRESS" }
                     ]
                 """.formatted(id1, id2, id3)));
     }
@@ -137,7 +137,7 @@ class TodoEntryIntegrationTest {
                 .andExpect(content().json("{ \"description\":\"Entry 1\", \"status\":\"OPEN\" }"))
                 .andExpect(jsonPath("$.id").isString());
 
-        String id = getIdFromResultTodoEntry("Entry 1", "OPEN", resultActions);
+        String id = getIdFromResultTodoEntry("Entry 1", TodoEntryStatus.OPEN, resultActions);
         assertNotNull( id );
         assertTrue( repoContainsTodoEntry(id) );
     }
@@ -146,7 +146,7 @@ class TodoEntryIntegrationTest {
     @DirtiesContext
     void whenGetEntry_getsValidId_returnsTodoEntry() throws Exception {
         // Given
-        String id = addTestTodoEntry("Entry 1", "OPEN" );
+        String id = addTestTodoEntry("Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -165,7 +165,7 @@ class TodoEntryIntegrationTest {
     @DirtiesContext
     void whenGetEntry_getsInvalidId_returns404() throws Exception {
         // Given
-        String id = addTestTodoEntry("Entry 1", "OPEN" );
+        String id = addTestTodoEntry("Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -181,7 +181,7 @@ class TodoEntryIntegrationTest {
     @DirtiesContext
     void whenUpdateEntry_getsInvalidId_returns404() throws Exception {
         // Given
-        String id = addTestTodoEntry("Entry 1", "OPEN" );
+        String id = addTestTodoEntry("Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -201,7 +201,7 @@ class TodoEntryIntegrationTest {
     @DirtiesContext
     void whenUpdateEntry_getsDifferentIds_returns400() throws Exception {
         // Given
-        String id = addTestTodoEntry("Entry 1", "OPEN" );
+        String id = addTestTodoEntry("Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -221,7 +221,7 @@ class TodoEntryIntegrationTest {
     @DirtiesContext
     void whenUpdateEntry_getsValidIdWithoutOtherValues_returnsChangedTodoEntry() throws Exception {
         // Given
-        String id = addTestTodoEntry("Entry 1", "OPEN" );
+        String id = addTestTodoEntry("Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -244,7 +244,7 @@ class TodoEntryIntegrationTest {
     @DirtiesContext
     void whenUpdateEntry_getsValidIdAndDescription_returnsChangedTodoEntry() throws Exception {
         // Given
-        String id = addTestTodoEntry("Entry 1", "OPEN" );
+        String id = addTestTodoEntry("Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -267,7 +267,7 @@ class TodoEntryIntegrationTest {
     @DirtiesContext
     void whenUpdateEntry_getsValidIdAndStatus_returnsChangedTodoEntry() throws Exception {
         // Given
-        String id = addTestTodoEntry("Entry 1", "OPEN" );
+        String id = addTestTodoEntry("Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -290,7 +290,7 @@ class TodoEntryIntegrationTest {
     @DirtiesContext
     void whenUpdateEntry_getsValidIdAndDescriptionAndStatus_returnsUpdatedTodoEntry() throws Exception {
         // Given
-        String id = addTestTodoEntry("Entry 1", "OPEN" );
+        String id = addTestTodoEntry("Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -313,7 +313,7 @@ class TodoEntryIntegrationTest {
     @DirtiesContext
     void whenDeleteEntry_isCalled() throws Exception {
         // Given
-        String id = addTestTodoEntry("Entry 1", "OPEN" );
+        String id = addTestTodoEntry("Entry 1", TodoEntryStatus.OPEN );
         assertTrue( repoContainsTodoEntry(id) );
 
         // When

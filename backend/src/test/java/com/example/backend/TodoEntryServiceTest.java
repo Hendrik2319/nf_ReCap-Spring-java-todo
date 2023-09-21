@@ -38,11 +38,11 @@ class TodoEntryServiceTest {
     void whenGetAllEntries_calledOnFilledRepo_returnListOfTodoEntries() {
         // Given
         when(todoEntryRepository.findAll()).thenReturn(List.of(
-                new TodoEntry("123","Entry 1","OPEN"       ),
-                new TodoEntry("124","Entry 2","DONE"       ),
-                new TodoEntry("125","Entry 3","IN_PROGRESS"),
-                new TodoEntry("126","Entry 4","DONE"       ),
-                new TodoEntry("127","Entry 5","OPEN"       )
+                new TodoEntry("123","Entry 1",TodoEntryStatus.OPEN       ),
+                new TodoEntry("124","Entry 2",TodoEntryStatus.DONE       ),
+                new TodoEntry("125","Entry 3",TodoEntryStatus.IN_PROGRESS),
+                new TodoEntry("126","Entry 4",TodoEntryStatus.DONE       ),
+                new TodoEntry("127","Entry 5",TodoEntryStatus.OPEN       )
         ));
 
         // When
@@ -51,11 +51,11 @@ class TodoEntryServiceTest {
         // Then
         verify(todoEntryRepository).findAll();
         List<TodoEntry> expected = List.of(
-                new TodoEntry("123","Entry 1","OPEN"       ),
-                new TodoEntry("124","Entry 2","DONE"       ),
-                new TodoEntry("125","Entry 3","IN_PROGRESS"),
-                new TodoEntry("126","Entry 4","DONE"       ),
-                new TodoEntry("127","Entry 5","OPEN"       )
+                new TodoEntry("123","Entry 1",TodoEntryStatus.OPEN       ),
+                new TodoEntry("124","Entry 2",TodoEntryStatus.DONE       ),
+                new TodoEntry("125","Entry 3",TodoEntryStatus.IN_PROGRESS),
+                new TodoEntry("126","Entry 4",TodoEntryStatus.DONE       ),
+                new TodoEntry("127","Entry 5",TodoEntryStatus.OPEN       )
         );
         assertEquals(expected, actual);
     }
@@ -63,15 +63,15 @@ class TodoEntryServiceTest {
     @Test
     void whenCreateEntry_isCalled_returnsSavedTodoEntry() {
         // Given
-        when(todoEntryRepository.save( new TodoEntry(null,"Entry 1","OPEN") ))
-                          .thenReturn( new TodoEntry("123","Entry 1","OPEN") );
+        when(todoEntryRepository.save( new TodoEntry(null ,"Entry 1",TodoEntryStatus.OPEN) ))
+                          .thenReturn( new TodoEntry("123","Entry 1",TodoEntryStatus.OPEN) );
 
         // When
-        TodoEntry actual = todoEntryService.createEntry(new NewTodoEntry("Entry 1","OPEN"));
+        TodoEntry actual = todoEntryService.createEntry(new NewTodoEntry("Entry 1",TodoEntryStatus.OPEN));
 
         // Then
-        verify(todoEntryRepository).save(new TodoEntry(null,"Entry 1","OPEN"));
-        TodoEntry expected = new TodoEntry("123","Entry 1","OPEN");
+        verify(todoEntryRepository).save(new TodoEntry(null,"Entry 1",TodoEntryStatus.OPEN));
+        TodoEntry expected = new TodoEntry("123","Entry 1",TodoEntryStatus.OPEN);
         assertEquals(expected, actual);
     }
 
@@ -95,7 +95,7 @@ class TodoEntryServiceTest {
     void whenGetEntry_getsValidID_returnTodoEntryInOptional() {
         // Given
         when(todoEntryRepository.findById("456")).thenReturn(
-                Optional.of(new TodoEntry("456","Entry 1","OPEN"))
+                Optional.of(new TodoEntry("456","Entry 1",TodoEntryStatus.OPEN))
         );
 
         // When
@@ -103,7 +103,7 @@ class TodoEntryServiceTest {
 
         // Then
         verify(todoEntryRepository).findById("456");
-        TodoEntry expected = new TodoEntry("456","Entry 1","OPEN");
+        TodoEntry expected = new TodoEntry("456","Entry 1",TodoEntryStatus.OPEN);
         assertNotNull(actual);
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -117,7 +117,7 @@ class TodoEntryServiceTest {
         );
 
         // When
-        Optional<TodoEntry> actual = todoEntryService.updateEntry("456", new TodoEntry("456","Entry 1","OPEN"));
+        Optional<TodoEntry> actual = todoEntryService.updateEntry("456", new TodoEntry("456","Entry 1",TodoEntryStatus.OPEN));
 
         // Then
         verify(todoEntryRepository).findById("456");
@@ -129,16 +129,16 @@ class TodoEntryServiceTest {
     void whenUpdateEntry_getsValidIDWithoutOtherValues_returnUnchangedTodoEntryInOptional() {
         // Given
         when(todoEntryRepository.findById("456"))
-                .thenReturn( Optional.of( new TodoEntry("456","Entry 1","OPEN") ));
-        when(todoEntryRepository.save(    new TodoEntry("456","Entry 1","OPEN") ))
-                .thenReturn(              new TodoEntry("456","Entry 1","OPEN") );
+                .thenReturn( Optional.of( new TodoEntry("456","Entry 1",TodoEntryStatus.OPEN) ));
+        when(todoEntryRepository.save(    new TodoEntry("456","Entry 1",TodoEntryStatus.OPEN) ))
+                .thenReturn(              new TodoEntry("456","Entry 1",TodoEntryStatus.OPEN) );
 
         // When
         Optional<TodoEntry> actual = todoEntryService.updateEntry("456", new TodoEntry(null,null,null));
 
         // Then
         verify(todoEntryRepository).findById("456");
-        TodoEntry expected = new TodoEntry("456", "Entry 1", "OPEN");
+        TodoEntry expected = new TodoEntry("456", "Entry 1", TodoEntryStatus.OPEN);
         assertNotNull(actual);
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -148,16 +148,16 @@ class TodoEntryServiceTest {
     void whenUpdateEntry_getsValidIDAndDescription_returnUpdatedTodoEntryInOptional() {
         // Given
         when(todoEntryRepository.findById("456"))
-                .thenReturn( Optional.of( new TodoEntry("456","Entry 1","OPEN") ));
-        when(todoEntryRepository.save(    new TodoEntry("456","ABC"    ,"OPEN") ))
-                .thenReturn(              new TodoEntry("456","ABC"    ,"OPEN") );
+                .thenReturn( Optional.of( new TodoEntry("456","Entry 1",TodoEntryStatus.OPEN) ));
+        when(todoEntryRepository.save(    new TodoEntry("456","ABC"    ,TodoEntryStatus.OPEN) ))
+                .thenReturn(              new TodoEntry("456","ABC"    ,TodoEntryStatus.OPEN) );
 
         // When
         Optional<TodoEntry> actual = todoEntryService.updateEntry("456", new TodoEntry(null,"ABC",null));
 
         // Then
         verify(todoEntryRepository).findById("456");
-        TodoEntry expected = new TodoEntry("456", "ABC", "OPEN");
+        TodoEntry expected = new TodoEntry("456", "ABC", TodoEntryStatus.OPEN);
         assertNotNull(actual);
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -167,16 +167,16 @@ class TodoEntryServiceTest {
     void whenUpdateEntry_getsValidIDAndStatus_returnUpdatedTodoEntryInOptional() {
         // Given
         when(todoEntryRepository.findById("456"))
-                .thenReturn( Optional.of( new TodoEntry("456","Entry 1","OPEN") ));
-        when(todoEntryRepository.save(    new TodoEntry("456","Entry 1","DONE") ))
-                .thenReturn(              new TodoEntry("456","Entry 1","DONE") );
+                .thenReturn( Optional.of( new TodoEntry("456","Entry 1",TodoEntryStatus.OPEN) ));
+        when(todoEntryRepository.save(    new TodoEntry("456","Entry 1",TodoEntryStatus.DONE) ))
+                .thenReturn(              new TodoEntry("456","Entry 1",TodoEntryStatus.DONE) );
 
         // When
-        Optional<TodoEntry> actual = todoEntryService.updateEntry("456", new TodoEntry(null,null,"DONE"));
+        Optional<TodoEntry> actual = todoEntryService.updateEntry("456", new TodoEntry(null,null,TodoEntryStatus.DONE));
 
         // Then
         verify(todoEntryRepository).findById("456");
-        TodoEntry expected = new TodoEntry("456", "Entry 1", "DONE");
+        TodoEntry expected = new TodoEntry("456", "Entry 1", TodoEntryStatus.DONE);
         assertNotNull(actual);
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -186,16 +186,16 @@ class TodoEntryServiceTest {
     void whenUpdateEntry_getsValidIDAndDescriptionAndStatus_returnUpdatedTodoEntryInOptional() {
         // Given
         when(todoEntryRepository.findById("456"))
-                .thenReturn( Optional.of( new TodoEntry("456","Entry 1","OPEN") ));
-        when(todoEntryRepository.save(    new TodoEntry("456","ABC","DONE") ))
-                .thenReturn(              new TodoEntry("456","ABC","DONE") );
+                .thenReturn( Optional.of( new TodoEntry("456","Entry 1",TodoEntryStatus.OPEN) ));
+        when(todoEntryRepository.save(    new TodoEntry("456","ABC"    ,TodoEntryStatus.DONE) ))
+                .thenReturn(              new TodoEntry("456","ABC"    ,TodoEntryStatus.DONE) );
 
         // When
-        Optional<TodoEntry> actual = todoEntryService.updateEntry("456", new TodoEntry(null,"ABC","DONE"));
+        Optional<TodoEntry> actual = todoEntryService.updateEntry("456", new TodoEntry(null,"ABC",TodoEntryStatus.DONE));
 
         // Then
         verify(todoEntryRepository).findById("456");
-        TodoEntry expected = new TodoEntry("456", "ABC", "DONE");
+        TodoEntry expected = new TodoEntry("456", "ABC", TodoEntryStatus.DONE);
         assertNotNull(actual);
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
