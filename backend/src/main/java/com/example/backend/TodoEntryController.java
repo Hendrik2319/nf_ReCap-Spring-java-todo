@@ -1,5 +1,6 @@
 package com.example.backend;
 
+import com.example.backend.chatgpt.ChatGptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.List;
 public class TodoEntryController {
 
     private final TodoEntryService todoEntryRepository;
+    //private final ChatGptService chatGptService;
 
     @GetMapping
     List<TodoEntry> getAllEntries() {
