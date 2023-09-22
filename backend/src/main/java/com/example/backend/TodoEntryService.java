@@ -1,5 +1,6 @@
 package com.example.backend;
 
+import com.example.backend.chatgpt.ChatGptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,12 +12,20 @@ import java.util.Optional;
 public class TodoEntryService {
 
     private final TodoEntryRepository todoEntryRepository;
+    private final ChatGptService chatGptService;
 
     public List<TodoEntry> getAllEntries() {
         return todoEntryRepository.findAll();
     }
 
     public TodoEntry createEntry(NewTodoEntry newTodoEntry) {
+        String prompt = "Bitte folgenden Text in Deutsch auf Rechtschreibung und Grammatik prüfen" +
+                " und die korrigierte Fassung als Antwort ohne zusätzlichen Text zurückgeben: " +
+                newTodoEntry.description();
+
+        String fixedDescription = chatGptService.askChatGPT(prompt);
+        newTodoEntry = newTodoEntry.withDescription(fixedDescription);
+
         return todoEntryRepository.save(new TodoEntry(newTodoEntry));
     }
 
