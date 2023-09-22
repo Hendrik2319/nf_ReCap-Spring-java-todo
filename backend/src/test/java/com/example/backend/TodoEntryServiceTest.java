@@ -1,5 +1,6 @@
 package com.example.backend;
 
+import com.example.backend.chatgpt.ChatGptService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,12 +13,14 @@ import static org.mockito.Mockito.*;
 class TodoEntryServiceTest {
 
     private TodoEntryRepository todoEntryRepository;
+    private ChatGptService chatGptService;
     private TodoEntryService todoEntryService;
 
     @BeforeEach
     void setup() {
         todoEntryRepository = mock(TodoEntryRepository.class);
-        todoEntryService = new TodoEntryService(todoEntryRepository);
+        chatGptService = mock(ChatGptService.class);
+        todoEntryService = new TodoEntryService(todoEntryRepository, chatGptService);
     }
 
     @Test
@@ -63,15 +66,22 @@ class TodoEntryServiceTest {
     @Test
     void whenCreateEntry_isCalled_returnsSavedTodoEntry() {
         // Given
-        when(todoEntryRepository.save( new TodoEntry(null ,"Entry 1",TodoEntryStatus.OPEN) ))
-                          .thenReturn( new TodoEntry("123","Entry 1",TodoEntryStatus.OPEN) );
+        String prompt = "Bitte folgenden Text in Deutsch auf Rechtschreibung und Grammatik prüfen" +
+                " und die korrigierte Fassung als Antwort ohne zusätzlichen Text zurückgeben: " +
+                "Kirshe";
+
+        when(chatGptService.askChatGPT(prompt))
+                .thenReturn("Kirsche");
+
+        when(todoEntryRepository.save( new TodoEntry(null ,"Kirsche",TodoEntryStatus.OPEN) ))
+                .thenReturn( new TodoEntry("123","Kirsche",TodoEntryStatus.OPEN) );
 
         // When
-        TodoEntry actual = todoEntryService.createEntry(new NewTodoEntry("Entry 1",TodoEntryStatus.OPEN));
+        TodoEntry actual = todoEntryService.createEntry(new NewTodoEntry("Kirshe",TodoEntryStatus.OPEN));
 
         // Then
-        verify(todoEntryRepository).save(new TodoEntry(null,"Entry 1",TodoEntryStatus.OPEN));
-        TodoEntry expected = new TodoEntry("123","Entry 1",TodoEntryStatus.OPEN);
+        verify(todoEntryRepository).save(new TodoEntry(null,"Kirsche",TodoEntryStatus.OPEN));
+        TodoEntry expected = new TodoEntry("123","Kirsche",TodoEntryStatus.OPEN);
         assertEquals(expected, actual);
     }
 
