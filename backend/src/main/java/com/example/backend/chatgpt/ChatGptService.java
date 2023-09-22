@@ -15,11 +15,12 @@ public class ChatGptService {
     private final WebClient webClient;
 
     public ChatGptService(
+            @Value("${app.openai-api-url}") String openaiApiUrl,
             @Value("${app.openai-api-key}") String openaiApiKey,
             @Value("${app.openai-api-organization}") String openaiApiOrganization
     ) {
         this.webClient = WebClient.builder()
-                .baseUrl("https://api.openai.com/v1/chat/completions")
+                .baseUrl(openaiApiUrl)
                 .defaultHeader("Authorization", "Bearer " + openaiApiKey)
                 .defaultHeader("OpenAI-Organization", openaiApiOrganization)
                 .build();
