@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>change log</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        a {
+            display: inline-block;
+            cursor: pointer;
+            padding: 4px 10px;
+            text-decoration: none;
+            color: #000;
+            background-color: #f0f0f0;
+            border: 1px solid #777;
+            border-radius: 5px;
+        }
+        a:visited {
+            color: #000;
+        }
+        a:hover {
+            background-color: #e0e0e0;
+        }
+        iframe {
+            width: calc(100% - 10px);
+            height: 700px;
+        }
+    </style>
+</head>
+<body>
+<a href="/undo" target="command-response">Undo</a>
+<a href="/redo" target="command-response">Redo</a>
+<a href="/show-change-log" target="command-response">Show Change Log</a>
+<br/>
+<iframe name="command-response">
+
+</iframe>
+
+</body>
+</html>
