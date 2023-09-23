@@ -1,5 +1,6 @@
 package com.example.backend;
 
+import com.example.backend.changelog.ChangeLogService;
 import com.example.backend.chatgpt.ChatGptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ public class TodoEntryService {
 
     private final TodoEntryRepository todoEntryRepository;
     private final ChatGptService chatGptService;
+    private final ChangeLogService changeLogService;
 
     public List<TodoEntry> getAllEntries() {
         return todoEntryRepository.findAll();
@@ -26,7 +28,9 @@ public class TodoEntryService {
         String fixedDescription = chatGptService.askChatGPT(prompt);
         newTodoEntry = newTodoEntry.withDescription(fixedDescription);
 
-        return todoEntryRepository.save(new TodoEntry(newTodoEntry));
+        TodoEntry saved = todoEntryRepository.save(new TodoEntry(newTodoEntry));
+        changeLogService.logChange(null, saved);
+        return saved;
     }
 
     public Optional<TodoEntry> getEntry(String id) {
@@ -38,16 +42,21 @@ public class TodoEntryService {
 
         if (savedEntryOpt.isPresent()) {
             TodoEntry savedEntry = savedEntryOpt.get();
+            TodoEntry prev = savedEntry;
             if (todoEntry.description()!=null) savedEntry = savedEntry.withDescription(todoEntry.description());
             if (todoEntry.status()     !=null) savedEntry = savedEntry.withStatus     (todoEntry.status     ());
-            savedEntryOpt = Optional.of(todoEntryRepository.save(savedEntry));
+            savedEntry = todoEntryRepository.save(savedEntry);
+            changeLogService.logChange(prev, savedEntry);
+            savedEntryOpt = Optional.of(savedEntry);
         }
 
         return savedEntryOpt;
     }
 
     public void deleteEntry(String id) {
+        TodoEntry prev = todoEntryRepository.findById(id).orElse(null);
         todoEntryRepository.deleteById(id);
+        changeLogService.logChange(prev, null);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.backend;
 
+import com.example.backend.changelog.ChangeLogService;
 import com.example.backend.chatgpt.ChatGptService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,13 +15,15 @@ class TodoEntryServiceTest {
 
     private TodoEntryRepository todoEntryRepository;
     private ChatGptService chatGptService;
+    private ChangeLogService changeLogService;
     private TodoEntryService todoEntryService;
 
     @BeforeEach
     void setup() {
         todoEntryRepository = mock(TodoEntryRepository.class);
         chatGptService = mock(ChatGptService.class);
-        todoEntryService = new TodoEntryService(todoEntryRepository, chatGptService);
+        changeLogService = mock(ChangeLogService.class);
+        todoEntryService = new TodoEntryService(todoEntryRepository, chatGptService, changeLogService);
     }
 
     @Test

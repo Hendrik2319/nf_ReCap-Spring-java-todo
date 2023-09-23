@@ -57,11 +57,6 @@
             <version>4.10.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>net.bull.javamelody</groupId>
-            <artifactId>javamelody-spring-boot-starter</artifactId>
-            <version>2.0.1</version>
-        </dependency>
     </dependencies>
 
     <build>
