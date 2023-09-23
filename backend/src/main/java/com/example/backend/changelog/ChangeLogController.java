@@ -5,26 +5,27 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/change-log")
 @RequiredArgsConstructor
 public class ChangeLogController {
 
-    @GetMapping("/show")
-    String showChangeLog() {
+    private final ChangeLogService changeLogService;
 
-        return "----";
+    @GetMapping("/show")
+    List<ChangeLogEntry> showChangeLog() {
+        return changeLogService.getAllEntries();
     }
 
     @GetMapping("/undo")
-    String undoLastChange() {
-
-        return "----";
+    ChangeLogEntry undoLastChange() {
+        return changeLogService.undoLastChange();
     }
 
     @GetMapping("/redo")
-    String redoUndoneChange() {
-
-        return "----";
+    ChangeLogEntry redoUndoneChange() {
+        return changeLogService.redoUndoneChange();
     }
 }
