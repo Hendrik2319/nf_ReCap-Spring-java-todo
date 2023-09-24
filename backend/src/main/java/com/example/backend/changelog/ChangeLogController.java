@@ -13,6 +13,7 @@ import java.util.List;
 public class ChangeLogController {
 
     private final ChangeLogService changeLogService;
+    private final ChangeLogEntryIndexService changeLogEntryIndexService;
 
     @GetMapping("/show")
     public String showChangeLog() {
@@ -21,7 +22,7 @@ public class ChangeLogController {
 
     @GetMapping("/index")
     public String showChangeLogIndedx() {
-        return "Current log entry index: %d".formatted(changeLogService.getChangeLogEntryIndex());
+        return "Current log entry index: %d".formatted(changeLogEntryIndexService.getIndex());
     }
 
     @GetMapping("/undo")

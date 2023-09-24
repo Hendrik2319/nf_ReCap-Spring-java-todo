@@ -15,15 +15,13 @@ class TodoEntryServiceTest {
 
     private TodoEntryRepository todoEntryRepository;
     private ChatGptService chatGptService;
-    private ChangeLogService changeLogService;
     private TodoEntryService todoEntryService;
 
     @BeforeEach
     void setup() {
         todoEntryRepository = mock(TodoEntryRepository.class);
         chatGptService = mock(ChatGptService.class);
-        changeLogService = mock(ChangeLogService.class);
-        todoEntryService = new TodoEntryService(todoEntryRepository, chatGptService, changeLogService);
+        todoEntryService = new TodoEntryService(todoEntryRepository, chatGptService, mock(ChangeLogService.class));
     }
 
     @Test
