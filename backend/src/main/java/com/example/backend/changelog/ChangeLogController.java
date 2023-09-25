@@ -21,7 +21,7 @@ public class ChangeLogController {
     }
 
     @GetMapping("/index")
-    public String showChangeLogIndedx() {
+    public String showChangeLogIndex() {
         return "Current log entry index: %d".formatted(changeLogEntryIndexService.getIndex());
     }
 
@@ -35,7 +35,7 @@ public class ChangeLogController {
         return toString(changeLogService.redoUndoneChange());
     }
 
-    private String toString(List<ChangeLogEntry> allEntries) {
+    static String toString(List<ChangeLogEntry> allEntries) {
         StringBuilder sb = new StringBuilder();
         sb.append("<pre>\r\n");
         sb.append("[\r\n");
@@ -46,7 +46,7 @@ public class ChangeLogController {
         return sb.toString();
     }
 
-    private String toString(ChangeLogEntry changeLogEntry) {
+    static String toString(ChangeLogEntry changeLogEntry) {
         StringBuilder sb = new StringBuilder();
         sb.append("<pre>\r\n");
         print(sb, "", changeLogEntry);
@@ -54,7 +54,7 @@ public class ChangeLogController {
         return sb.toString();
     }
 
-    private void print(StringBuilder sb, String indent, ChangeLogEntry changeLogEntry) {
+    static void print(StringBuilder sb, String indent, ChangeLogEntry changeLogEntry) {
         if (changeLogEntry ==null)
             sb.append("%s<null>%n".formatted(indent));
         else {
@@ -67,7 +67,7 @@ public class ChangeLogController {
         }
     }
 
-    private void print(StringBuilder sb, String prefix, String indent, TodoEntry todoEntry) {
+    static void print(StringBuilder sb, String prefix, String indent, TodoEntry todoEntry) {
         if (todoEntry==null)
             sb.append(prefix).append("<null>");
         else {

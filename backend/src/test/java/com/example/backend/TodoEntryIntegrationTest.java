@@ -5,6 +5,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,11 +31,17 @@ class TodoEntryIntegrationTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
+    private IntegrationTestHelper helper;
 
     @BeforeAll
     static void setup() throws IOException {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
+    }
+
+    @BeforeEach
+    void setupEach() {
+        helper = new IntegrationTestHelper(mockMvc, objectMapper);
     }
 
     @AfterAll
@@ -68,63 +75,6 @@ class TodoEntryIntegrationTest {
 
     }
 
-    private String addTestTodoEntry(String description, String fixedDescription, TodoEntryStatus status) {
-        try {
-
-            ResultActions resultActions = mockMvc
-                    .perform(MockMvcRequestBuilders
-                            .post("/api/todo")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("""
-                                        { "description":"%s", "status":"%s" }
-                                    """.formatted(description, status))
-                    )
-                    .andExpect(status().isOk());
-
-            return getIdFromResultTodoEntry(fixedDescription, status, resultActions);
-
-        } catch (Exception e) {
-            System.err.printf("%s while performing mock request: %s%n", e.getClass().getSimpleName(), e.getMessage());
-            return null;
-        }
-    }
-
-    private String getIdFromResultTodoEntry(String description, TodoEntryStatus status, ResultActions resultActions) {
-        try {
-            String body = resultActions
-                    .andReturn()
-                    .getResponse()
-                    .getContentAsString();
-
-            TodoEntry todoEntry = objectMapper.readValue(body, TodoEntry.class);
-
-            assertNotNull(todoEntry);
-            assertEquals(description, todoEntry.description());
-            assertEquals(status, todoEntry.status());
-
-            return todoEntry.id();
-
-        } catch (Exception e) {
-            System.err.printf("%s while parsing response: %s%n", e.getClass().getSimpleName(), e.getMessage());
-            return null;
-        }
-    }
-
-    private boolean repoContainsTodoEntry(String id) {
-        try {
-            return mockMvc
-                    .perform(MockMvcRequestBuilders
-                            .get("/api/todo/%s".formatted(id))
-                    )
-                    .andReturn()
-                    .getResponse()
-                    .getStatus() == 200;
-        } catch (Exception e) {
-            System.err.printf("%s while performing mock request: %s%n", e.getClass().getSimpleName(), e.getMessage());
-            return false;
-        }
-    }
-
     @Test
     @DirtiesContext
     void whenGetAllEntries_calledOnEmptyDataBase_returnsEmptyList() throws Exception {
@@ -146,9 +96,9 @@ class TodoEntryIntegrationTest {
         enqueueMockResponseFromOpenAiApi("Fixed Entry 1");
         enqueueMockResponseFromOpenAiApi("Fixed Entry 2");
         enqueueMockResponseFromOpenAiApi("Fixed Entry 3");
-        String id1 = addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN       );
-        String id2 = addTestTodoEntry("Entry 2", "Fixed Entry 2", TodoEntryStatus.DONE       );
-        String id3 = addTestTodoEntry("Entry 3", "Fixed Entry 3", TodoEntryStatus.IN_PROGRESS);
+        String id1 = helper.addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN       );
+        String id2 = helper.addTestTodoEntry("Entry 2", "Fixed Entry 2", TodoEntryStatus.DONE       );
+        String id3 = helper.addTestTodoEntry("Entry 3", "Fixed Entry 3", TodoEntryStatus.IN_PROGRESS);
 
         // When
         mockMvc
@@ -186,9 +136,9 @@ class TodoEntryIntegrationTest {
                 .andExpect(content().json("{ \"description\":\"Fixed Entry Name\", \"status\":\"OPEN\" }"))
                 .andExpect(jsonPath("$.id").isString());
 
-        String id = getIdFromResultTodoEntry("Fixed Entry Name", TodoEntryStatus.OPEN, resultActions);
+        String id = helper.getIdFromResultTodoEntry("Fixed Entry Name", TodoEntryStatus.OPEN, resultActions);
         assertNotNull( id );
-        assertTrue( repoContainsTodoEntry(id) );
+        assertTrue( helper.repoContainsTodoEntry(id) );
     }
 
     @Test
@@ -196,7 +146,7 @@ class TodoEntryIntegrationTest {
     void whenGetEntry_getsValidId_returnsTodoEntry() throws Exception {
         // Given
         enqueueMockResponseFromOpenAiApi("Fixed Entry 1");
-        String id = addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
+        String id = helper.addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -216,7 +166,7 @@ class TodoEntryIntegrationTest {
     void whenGetEntry_getsInvalidId_returns404() throws Exception {
         // Given
         enqueueMockResponseFromOpenAiApi("Fixed Entry 1");
-        String id = addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
+        String id = helper.addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -233,7 +183,7 @@ class TodoEntryIntegrationTest {
     void whenUpdateEntry_getsInvalidId_returns404() throws Exception {
         // Given
         enqueueMockResponseFromOpenAiApi("Fixed Entry 1");
-        String id = addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
+        String id = helper.addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -254,7 +204,7 @@ class TodoEntryIntegrationTest {
     void whenUpdateEntry_getsDifferentIds_returns400() throws Exception {
         // Given
         enqueueMockResponseFromOpenAiApi("Fixed Entry 1");
-        String id = addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
+        String id = helper.addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -275,7 +225,7 @@ class TodoEntryIntegrationTest {
     void whenUpdateEntry_getsValidIdWithoutOtherValues_returnsChangedTodoEntry() throws Exception {
         // Given
         enqueueMockResponseFromOpenAiApi("Fixed Entry 1");
-        String id = addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
+        String id = helper.addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -299,7 +249,7 @@ class TodoEntryIntegrationTest {
     void whenUpdateEntry_getsValidIdAndDescription_returnsChangedTodoEntry() throws Exception {
         // Given
         enqueueMockResponseFromOpenAiApi("Fixed Entry 1");
-        String id = addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
+        String id = helper.addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -323,7 +273,7 @@ class TodoEntryIntegrationTest {
     void whenUpdateEntry_getsValidIdAndStatus_returnsChangedTodoEntry() throws Exception {
         // Given
         enqueueMockResponseFromOpenAiApi("Fixed Entry 1");
-        String id = addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
+        String id = helper.addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -347,7 +297,7 @@ class TodoEntryIntegrationTest {
     void whenUpdateEntry_getsValidIdAndDescriptionAndStatus_returnsUpdatedTodoEntry() throws Exception {
         // Given
         enqueueMockResponseFromOpenAiApi("Fixed Entry 1");
-        String id = addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
+        String id = helper.addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
 
         // When
         mockMvc
@@ -371,8 +321,8 @@ class TodoEntryIntegrationTest {
     void whenDeleteEntry_isCalled() throws Exception {
         // Given
         enqueueMockResponseFromOpenAiApi("Fixed Entry 1");
-        String id = addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
-        assertTrue( repoContainsTodoEntry(id) );
+        String id = helper.addTestTodoEntry("Entry 1", "Fixed Entry 1", TodoEntryStatus.OPEN );
+        assertTrue( helper.repoContainsTodoEntry(id) );
 
         // When
         mockMvc
@@ -385,6 +335,6 @@ class TodoEntryIntegrationTest {
                 .andExpect(content().string(""))
         ;
 
-        assertFalse( repoContainsTodoEntry(id) );
+        assertFalse( helper.repoContainsTodoEntry(id) );
     }
 }
